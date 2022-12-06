@@ -3,6 +3,10 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 import openml
 
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+
 XY = Tuple[np.ndarray, np.ndarray]
 Dataset = Tuple[XY, XY]
 LogRegParams = Union[XY, Tuple[np.ndarray]]
@@ -41,7 +45,7 @@ def set_initial_params(model: LogisticRegression):
     information.
     """
     n_classes = 3  # MNIST has 10 classes
-    n_features = 10  # Number of features in dataset
+    n_features = 9  # Number of features in dataset
     model.classes_ = np.array([i for i in range(3)])
 
     model.coef_ = np.zeros((n_classes, n_features))
@@ -49,18 +53,19 @@ def set_initial_params(model: LogisticRegression):
         model.intercept_ = np.zeros((n_classes,))
 
 
-def load_mnist() -> Dataset:
+def load_dataset() -> Dataset:
     """Loads the MNIST dataset using OpenML.
     OpenML dataset link: https://www.openml.org/d/554
     """
-    mnist_openml = openml.datasets.get_dataset(554)
-    Xy, _, _, _ = mnist_openml.get_data(dataset_format="array")
-    X = Xy[:, :-1]  # the last column contains labels
-    y = Xy[:, -1]
-    # First 60000 samples consist of the train set
-    x_train, y_train = X[:60000], y[:60000]
-    x_test, y_test = X[60000:], y[60000:]
-    return (x_train, y_train), (x_test, y_test)
+    df = pd.read_csv("star_classification.csv")
+    df = df.drop(['obj_ID','alpha','delta','run_ID','rerun_ID','cam_col','field_ID','fiber_ID'], axis = 1)
+    df.drop(df.loc[:len(df)/4].index, inplace=True)
+    le = LabelEncoder()
+    df["class"] = le.fit_transform(df["class"])
+    X = df.drop(["class"],axis=1)
+    y = df["class"]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 42)
+    return  X_train, X_test, y_train, y_test
 
 
 def shuffle(X: np.ndarray, y: np.ndarray) -> XY:

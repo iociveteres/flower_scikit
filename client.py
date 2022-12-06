@@ -11,16 +11,8 @@ from sklearn.metrics import log_loss
 import utils
 
 if __name__ == "__main__":
-    
-    df = pd.read_csv("star_classification.csv")
-    df = df.drop(['obj_ID','alpha','delta','run_ID','rerun_ID','cam_col','field_ID','fiber_ID'], axis = 1)
-    le = LabelEncoder()
-    df["class"] = le.fit_transform(df["class"])
-    X = df.drop(["class"],axis=1)
-    y = df["class"]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 42)
     # # Load MNIST dataset from https://www.openml.org/d/554
-    # (X_train, y_train), (X_test, y_test) = utils.load_mnist()
+    X_train, X_test, y_train, y_test = utils.load_dataset()
 
     # Split train set into 10 partitions and randomly use one for training.
     partition_id = np.random.choice(10)

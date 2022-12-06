@@ -15,13 +15,7 @@ def get_evaluate_fn(model: LogisticRegression):
     """Return an evaluation function for server-side evaluation."""
 
     # Load test data here to avoid the overhead of doing it in `evaluate` itself
-    df = pd.read_csv("star_classification.csv")
-    df = df.drop(['obj_ID','alpha','delta','run_ID','rerun_ID','cam_col','field_ID','fiber_ID'], axis = 1)
-    le = LabelEncoder()
-    df["class"] = le.fit_transform(df["class"])
-    X = df.drop(["class"],axis=1)
-    y = df["class"]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 42)
+    X_train, X_test, y_train, y_test = utils.load_dataset()
 
     # The `evaluate` function will be called after every round
     def evaluate(server_round, parameters: fl.common.NDArrays, config):
@@ -46,5 +40,5 @@ if __name__ == "__main__":
     fl.server.start_server(
         server_address="localhost:8080",
         strategy=strategy,
-        config=fl.server.ServerConfig(num_rounds=5),
+        config=fl.server.ServerConfig(num_rounds=10),
     )
